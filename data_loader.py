@@ -3,10 +3,13 @@ This module defines the class DataLoader, in charge of reading the Image Segment
   http://archive.ics.uci.edu/ml/machine-learning-databases/image/
 Additionally, it has helper methods to automatically generate cross-validation datasets for hyper-
 parameters tuning.
+
+Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 """
 
 import csv
 import numpy as np
+import random
 
 class DataLoader:
   def __init__(self):
@@ -22,6 +25,14 @@ class DataLoader:
       w_train is the list of integer labels [w0, w1, ..., wn].
     """
     return (self.x_train, self.w_train)
+
+  def test_data(self):
+    """
+    Returns the loaded test data (x_test, w_test).
+      x_test is the list of test samples [x1, x2, ..., xn].
+      w_test is the list of integer labels [w0, w1, ..., wn].
+    """
+    return (self.x_test, self.w_test)
 
   def get_labels(self):
     """
@@ -53,6 +64,33 @@ class DataLoader:
 
     self.x_train, self.w_train = DataLoader.load_samples(training_data_filepath, self.lookup_labels)
     self.x_test, self.w_test = DataLoader.load_samples(test_data_filepath, self.lookup_labels)
+
+  def generate_cross_validation_sets(self, num_folds):
+    """
+    Splits up the training data into *num_folds* random, disjoint sets for cross-validation.
+    Returns a list of pairs of smaller sub-sets with their labels.
+    E.g., [(x_train1, w_train1), (x_train2, w_train2), ...].
+    """
+    def chunk_to_subset(chunk):
+      return (
+        list(map(lambda i: self.x_train[i], chunk)),
+        list(map(lambda i: self.w_train[i], chunk))
+      )
+
+    def break_down_chunks(seq, num_folds):
+        avg = len(seq) / float(num_folds)
+        chunks = []
+        last = 0.0
+        while last < len(seq):
+            chunks.append(seq[int(last):int(last + avg)])
+            last += avg
+        return chunks
+
+    shuffled_indices = list(range(len(self.x_train)))
+    random.shuffle(shuffled_indices)
+
+    index_chunks = break_down_chunks(shuffled_indices, num_folds)
+    return list(map(chunk_to_subset, index_chunks))
 
   @staticmethod
   def load_samples(filepath, lookup_labels):
