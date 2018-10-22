@@ -12,6 +12,21 @@ import numpy as np
 import random
 
 class DataLoader:
+  """
+  Usage.
+    a. Loading:
+      import data_loader
+      loader = data_loader.DataLoader()
+      loader.load("data/segmentation")
+      print(loader.get_labels())
+      print(loader.get_features())
+    b. Retrieving data:
+      loader.training_data()
+      loader.test_data()
+    c. Cross validation sets:
+      loader.generate_cross_validation_sets(number_folds)
+  """
+
   def __init__(self):
     self.features, self.labels = [], []
     self.x_train, self.w_train = [], []
@@ -68,7 +83,7 @@ class DataLoader:
   def generate_cross_validation_sets(self, num_folds):
     """
     Splits up the training data into *num_folds* random, disjoint sets for cross-validation.
-    Returns a list of pairs of smaller sub-sets with their labels.
+    Returns a list of pairs containing the smaller sub-sets and their labels.
     E.g., [(x_train1, w_train1), (x_train2, w_train2), ...].
     """
     def chunk_to_subset(chunk):
@@ -91,6 +106,19 @@ class DataLoader:
 
     index_chunks = break_down_chunks(shuffled_indices, num_folds)
     return list(map(chunk_to_subset, index_chunks))
+
+  @staticmethod
+  def group_by_label(x_data, w_data, int_labels):
+    """
+    Given a dataset represented by (x_data, w_data), returns a list of subsets
+    grouped by their integer label specified by w_data. The out list contains
+    only features, and follows the label order of int_labels.
+      E.g., [x_data1, x_data2, ..., x_dataN], where N is the number of labels.
+    """
+    return list(map(
+      lambda label_k: [x_data[i] for i in range(len(w_data)) if w_data[i] == label_k],
+      int_labels
+    ))
 
   @staticmethod
   def load_samples(filepath, lookup_labels):
