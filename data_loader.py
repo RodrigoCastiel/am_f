@@ -1,8 +1,9 @@
 """
-This module defines the class DataLoader, in charge of reading the Image Segmentation Data from:
+This module defines the class DataLoader, in charge of reading the Image 
+Segmentation Data from:
   http://archive.ics.uci.edu/ml/machine-learning-databases/image/
-Additionally, it has helper methods to automatically generate cross-validation datasets for hyper-
-parameters tuning.
+Additionally, it has helper methods to automatically generate cross-validation
+datasets for hyper-parameters tuning.
 
 Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 """
@@ -56,20 +57,21 @@ class DataLoader:
   def get_labels(self):
     """
     Returns the list of loaded classes/labels.
-      e.g., ["brickface", "sky", "foliage", "cement", "window", "path", "grass"].
+      e.g., ["brickface", "sky", "foliage", "cement", "window", "path", ...].
     """
     return self.labels
 
   def get_features(self):
     """
     Returns the list of loaded features.
-      e.g., ["REGION-CENTROID-COL","REGION-CENTROID-ROW","REGION-PIXEL-COUNT", ...].
+      e.g., ["REGION-CENTROID-COL", "REGION-CENTROID-ROW", ...].
     """
     return self.features
 
   def load(self, dataset_prefix):
     """
-    Loads training data from the CSV files starting with *dataset_prefix*. That is,
+    Loads training data from the CSV files starting with *dataset_prefix*.
+    That is,
       Metadata: suffix = ".metadata.txt". Contains features and label.
       Training: suffix = ".training.txt". Specifies training data.
       Test:     suffix = "test.txt". Specifies test data.
@@ -81,8 +83,14 @@ class DataLoader:
     self.features, self.labels = DataLoader.load_metadata(metadata_filepath)
     self.lookup_labels = {self.labels[i]:i for i in range(len(self.labels))}
 
-    self.x_train, self.w_train = DataLoader.load_samples(training_data_filepath, self.lookup_labels)
-    self.x_test, self.w_test = DataLoader.load_samples(test_data_filepath, self.lookup_labels)
+    self.x_train, self.w_train = DataLoader.load_samples(
+      training_data_filepath,
+      self.lookup_labels
+    )
+    self.x_test, self.w_test = DataLoader.load_samples(
+      test_data_filepath,
+      self.lookup_labels
+    )
 
   def generate_cross_validation_sets(self, num_folds):
     """
@@ -120,7 +128,8 @@ class DataLoader:
       E.g., [x_data1, x_data2, ..., x_dataN], where N is the number of labels.
     """
     return list(map(
-      lambda label_k: [x_data[i] for i in range(len(w_data)) if w_data[i] == label_k],
+      lambda label_k:
+        [x_data[i] for i in range(len(w_data)) if w_data[i] == label_k],
       int_labels
     ))
 

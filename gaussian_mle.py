@@ -1,6 +1,7 @@
 """
-This module defines class GassianMLE, a maximum likelihood classifier for general datasets.
-It models the underlying generator pdf as a multivariate normal distribution.
+This module defines class GassianMLE, a maximum likelihood classifier for
+general datasets. It models the underlying generator pdf as a multivariate
+normal distribution.
 Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 """
 
@@ -20,9 +21,10 @@ class GaussianMLE:
 
   def train(self, x_train, w_train, num_classes):
     """
-    Estimates a prior probabilities p(w_i), the mean_i and the cov_i matrix for each class in the
-    training dataset. That is, from (x_train, w_train).
-    Once trained, you can call classify() to predict the class/label for a given feature vector.
+    Estimates a prior probabilities p(w_i), the mean_i and the cov_i matrix for
+    each class in the training dataset. That is, from (x_train, w_train).
+    Once trained, you can call classify() to predict the class/label
+    for a given feature vector.
     """
     # Break down dataset into smaller groups sharing the same label.
     int_labels = list(range(num_classes))
