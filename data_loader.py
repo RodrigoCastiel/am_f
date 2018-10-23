@@ -49,9 +49,13 @@ class DataLoader:
     """
     return (self.x_test, self.w_test)
 
+  def get_num_classes(self):
+    """Returns the number of loaded classes/labels."""
+    return len(self.labels)
+
   def get_labels(self):
     """
-    Returns the list of loaded labels.
+    Returns the list of loaded classes/labels.
       e.g., ["brickface", "sky", "foliage", "cement", "window", "path", "grass"].
     """
     return self.labels
