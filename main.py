@@ -16,8 +16,14 @@ def main():
   # Construct and train maximum likelihood gaussian estimator.
   gaussian_mle = GaussianMLE()
   gaussian_mle.train(x_train, w_train, num_classes)
-  print(w_train)
-  print(gaussian_mle.get_a_priori_probabilities())
+
+  # Evaluate GaussianMLE on test set.
+  x_test, w_test = loader.test_data()
+  num_correct_predictions, accuracy = gaussian_mle.evaluate(x_test, w_test)
+  print(
+    "Accuracy ... %lf%% (%d/%d)"
+    %(100.0*accuracy, num_correct_predictions, len(w_test))
+  )
 
 if __name__ == "__main__":
     main()

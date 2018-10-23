@@ -85,11 +85,11 @@ class DataLoader:
 
     self.x_train, self.w_train = DataLoader.load_samples(
       training_data_filepath,
-      self.lookup_labels
+      self.lookup_labels,
     )
     self.x_test, self.w_test = DataLoader.load_samples(
       test_data_filepath,
-      self.lookup_labels
+      self.lookup_labels,
     )
 
   def generate_cross_validation_sets(self, num_folds):
@@ -101,7 +101,7 @@ class DataLoader:
     def chunk_to_subset(chunk):
       return (
         list(map(lambda i: self.x_train[i], chunk)),
-        list(map(lambda i: self.w_train[i], chunk))
+        list(map(lambda i: self.w_train[i], chunk)),
       )
 
     def break_down_chunks(seq, num_folds):
