@@ -9,8 +9,9 @@ Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 
 import numpy as np
 from data_loader import DataLoader
+from sklearn.base import BaseEstimator, ClassifierMixin
 
-class GaussianMLE:
+class GaussianMLE(BaseEstimator, ClassifierMixin):
   def __init__(self):
     # Prior probabilities p(w_i) for each class w_i.
     self.p_w = []
@@ -23,7 +24,7 @@ class GaussianMLE:
     # Precomputed amplitudes for the gaussian pdfs.
     self.amplitudes = []
 
-  def train(self, x_train, w_train):
+  def fit(self, x_train, w_train):
     """
     Estimates a prior probabilities p(w_i), the mean i and the variance i for
     each class in the training dataset. That is, from (x_train, w_train).
@@ -57,6 +58,8 @@ class GaussianMLE:
     det_sigma = np.abs(np.product(self.sigma, axis=1))
     self.inv_sigma = 1.0/(self.sigma + epsilon)
     self.amplitudes = 1.0/np.sqrt(det_sigma + epsilon)
+
+    return self
 
   def predict(self, x_set):
     """

@@ -5,15 +5,16 @@ Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 import numpy as np
 import heapq
 from data_loader import DataLoader
+from sklearn.base import BaseEstimator, ClassifierMixin
 
-class KNNClassifier:
+class KNNClassifier(BaseEstimator, ClassifierMixin):
   def __init__(self, K = 7):
     self.K = K
     self.x_train = []
     self.w_train = []
     self.p_w = []
 
-  def train(self, x_train, w_train):
+  def fit(self, x_train, w_train):
     """
     Stores training points *x_train* and their correponsindg labels *w_train*,
     and estimates the a prior probabilities p(w_i) for each class w_i.
