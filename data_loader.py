@@ -121,7 +121,7 @@ class DataLoader:
     return list(map(chunk_to_subset, index_chunks))
 
   @staticmethod
-  def group_by_label(x_data, w_data, int_labels):
+  def group_by_label(x_data, w_data):
     """
     Given a dataset represented by (x_data, w_data), returns a list of subsets
     grouped by their integer label specified by w_data. The out list contains
@@ -129,13 +129,13 @@ class DataLoader:
       E.g., [x_data1, x_data2, ..., x_dataN], where N is the number of labels.
     """
     num_samples = len(w_data)
-
+    num_classes = len(np.unique(w_data))
     return list(map(
       lambda label_k:
         np.array(
           [x_data[i] for i in range(num_samples) if w_data[i] == label_k]
         ),
-      int_labels
+      list(range(num_classes)),
     ))
 
   @staticmethod

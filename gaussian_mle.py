@@ -12,15 +12,15 @@ from data_loader import DataLoader
 
 class GaussianMLE:
   def __init__(self):
-    # List of prior probabilities p(w_i) for each class w_i.
+    # Prior probabilities p(w_i) for each class w_i.
     self.p_w = []
-    # List of estimated means mi_i [N-array] for each class w_i.
+    # Estimated means mi_i [N-array] for each class w_i.
     self.mi = []
-    # List of estimated variances sigma_i for each class w_i.
+    # Estimated variances sigma_i for each class w_i.
     self.sigma = []
-    # List of precomputed inverse variances (sigma_i^-1).
+    # Precomputed inverse variances (sigma_i^-1).
     self.inv_sigma = []
-    # List of precomputed amplitudes for the gaussian pdfs.
+    # Precomputed amplitudes for the gaussian pdfs.
     self.amplitudes = []
 
   def train(self, x_train, w_train):
@@ -29,17 +29,16 @@ class GaussianMLE:
     each class in the training dataset. That is, from (x_train, w_train).
     Once trained, you can call classify() to predict the class/label
     for a given feature vector.
+    Note: all classes must have at least one sample.
     """
     # Break down dataset into smaller groups sharing the same label.
-    num_classes = len(np.unique(w_train))
-    int_labels = list(range(num_classes))
-    x_groups = DataLoader.group_by_label(x_train, w_train, int_labels)
+    x_groups = DataLoader.group_by_label(x_train, w_train)
 
     # Estimate a prior probabilities p(w_i) for each class w_i.
-    self.p_w = list(map(
+    self.p_w = np.array(list(map(
       lambda x_train_k: len(x_train_k)/len(x_train),
       x_groups,
-    ))
+    )))
 
     # Estimate mean and [diagonal] variances for each class w_i.
     # Pattern Classification (Second Edition), Section 3.2.3.
