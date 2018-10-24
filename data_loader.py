@@ -37,16 +37,16 @@ class DataLoader:
   def training_data(self):
     """
     Returns the loaded training data (x_train, w_train).
-      x_train is the list of training samples [x1, x2, ..., xn].
-      w_train is the list of integer labels [w0, w1, ..., wn].
+      x_train: matrix of training samples np.array([x1, x2, ...]).
+      w_train: array of integer labels np.array([w0, w1, ...]).
     """
     return (self.x_train, self.w_train)
 
   def test_data(self):
     """
     Returns the loaded test data (x_test, w_test).
-      x_test is the list of test samples [x1, x2, ..., xn].
-      w_test is the list of integer labels [w0, w1, ..., wn].
+      x_test: matrix of test samples np.array([x1, x2, ...]).
+      w_test: array of integer labels np.array([w0, w1, ...]).
     """
     return (self.x_test, self.w_test)
 
@@ -57,14 +57,14 @@ class DataLoader:
   def get_labels(self):
     """
     Returns the list of loaded classes/labels.
-      e.g., ["brickface", "sky", "foliage", "cement", "window", "path", ...].
+      e.g., ["brickface", "sky", "foliage", "cement", "window"].
     """
     return self.labels
 
   def get_features(self):
     """
     Returns the list of loaded features.
-      e.g., ["REGION-CENTROID-COL", "REGION-CENTROID-ROW", ...].
+      e.g., ["REGION-CENTROID-COL", "REGION-CENTROID-ROW"].
     """
     return self.features
 
@@ -94,7 +94,8 @@ class DataLoader:
 
   def generate_cross_validation_sets(self, num_folds):
     """
-    Splits up the training data into *num_folds* random, disjoint sets for cross-validation.
+    Splits up the training data into *num_folds* random, disjoint sets for 
+    cross-validation.
     Returns a list of pairs containing the smaller sub-sets and their labels.
     E.g., [(x_train1, w_train1), (x_train2, w_train2), ...].
     """
@@ -127,9 +128,13 @@ class DataLoader:
     only features, and follows the label order of int_labels.
       E.g., [x_data1, x_data2, ..., x_dataN], where N is the number of labels.
     """
+    num_samples = len(w_data)
+
     return list(map(
       lambda label_k:
-        [x_data[i] for i in range(len(w_data)) if w_data[i] == label_k],
+        np.array(
+          [x_data[i] for i in range(num_samples) if w_data[i] == label_k]
+        ),
       int_labels
     ))
 
@@ -145,7 +150,7 @@ class DataLoader:
         # Convert list of string numbers into numpy array.
         x_samples.append(np.array([float(x) for x in row[1:]]))
 
-    return (x_samples, w_samples)
+    return (np.array(x_samples), np.array(w_samples))
 
   @staticmethod
   def load_metadata(filepath):

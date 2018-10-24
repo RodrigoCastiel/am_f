@@ -11,11 +11,10 @@ def main():
   loader = DataLoader()
   loader.load("data/segmentation")
   x_train, w_train  = loader.training_data()
-  num_classes = loader.get_num_classes()
 
   # Construct and train maximum likelihood gaussian estimator.
   gaussian_mle = GaussianMLE()
-  gaussian_mle.train(x_train, w_train, num_classes)
+  gaussian_mle.train(x_train, w_train)
 
   # Evaluate GaussianMLE on test set.
   x_test, w_test = loader.test_data()
