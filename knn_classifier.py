@@ -44,19 +44,15 @@ class KNNClassifier:
     Classifies a single data-point. Returns the predicted integer label.
     """
     # Evaluate the distance L2 of x to all training points.
-    diff = (x - self.x_train)
-    dist = np.sqrt(diff[:, 0]**2 + diff[:, 1]**2)
+    dist  = np.linalg.norm(x - self.x_train, axis=1)
 
-    # Take nearest k points (use negative distances to behave like a max-heap).
-    nearest_k = []
-    for i in range(dist.shape[0]):
-      heapq.heappush(nearest_k, (-dist[i], self.w_train[i]))
-      if (len(nearest_k) > self.K): heapq.heappop(nearest_k)
+    # Compute indices of k nearest points (with respect to training_data).
+    nearest_k_indices = np.argpartition(dist, kth=self.K)
 
     # Majority wins.
     count = {}
-    for (_, k) in nearest_k:
-      count[k] = count.get(k, 0) + 1
+    for label in [self.w_train[k] for k in nearest_k_indices]:
+      count[label] = count.get(label, 0) + 1
     return max(count, key=count.get)
 
   def evaluate(self, x_test, w_test):

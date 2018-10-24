@@ -16,7 +16,7 @@ def main():
   # Construct and train estimators.
   gaussian_mle = GaussianMLE()
   gaussian_mle.train(x_train, w_train)
-  knn_classifier = KNNClassifier()
+  knn_classifier = KNNClassifier(K = 1)
   knn_classifier.train(x_train, w_train)
 
   # Evaluate estimators on test set.
