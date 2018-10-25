@@ -36,5 +36,6 @@ def main():
     %(100.0*accuracy_k, correct_predictions_k, data_size)
   )
 
+
 if __name__ == "__main__":
     main()

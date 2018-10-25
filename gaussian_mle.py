@@ -67,12 +67,12 @@ class GaussianMLE(BaseEstimator, ClassifierMixin):
     """
     Runs prediction/estimation for each point x in x_set. That is,
     chooses the class that maximuzes the scaled a posterior probability:
-        wj = argmax_wi { p(x_sample | wi) p(wi) }
+        wj = argmax_wi { p(x | wi) p(wi) }
         (excluding p(x) from the denomunator).
     Returns an array containing the predicted classes for each input point.
     """
-    def classify(x_sample):
-      p_x_wi = self.compute_likelihoods(x_sample)
+    def classify(x):
+      p_x_wi = self.compute_likelihoods(x)
       return np.argmax(p_x_wi * self.p_w)
 
     return np.array(list(map(classify, x_set)))

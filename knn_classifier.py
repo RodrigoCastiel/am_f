@@ -10,11 +10,12 @@ from data_loader import DataLoader
 from sklearn.base import BaseEstimator, ClassifierMixin
 
 class KNNClassifier(BaseEstimator, ClassifierMixin):
-  def __init__(self, K = 7):
+  def __init__(self, K = 3):
     self.K = K
     self.x_train = []
     self.w_train = []
     self.p_w = []
+    self.num_classes = 0
 
   def fit(self, x_train, w_train):
     """
@@ -31,6 +32,7 @@ class KNNClassifier(BaseEstimator, ClassifierMixin):
       lambda x_train_k: len(x_train_k)/len(x_train),
       x_groups,
     )))
+    self.num_classes = len(self.p_w)
 
     return self
 
@@ -39,30 +41,47 @@ class KNNClassifier(BaseEstimator, ClassifierMixin):
     Runs KNN prediction/estimation for each point x in x_set.
     Returns an array containing the predicted classes for each input point.
     """
-    return np.array(list(map(
-      lambda x: self.classify(x),
-      x_set,
-    )))
+    def classify(x):
+      # Pick top-voted label among the k nearest neighbors.
+      label_votes = self.knn_label_votes(x)
+      return max(label_votes, key=label_votes.get)
+
+    return np.array(list(map(classify, x_set)))
 
   def compute_a_posteriori(self, x):
-    # TODO(RodrigoCastiel): estimate p(wi|x) through the number of votes in KNN.
-    pass
-
-  def classify(self, x):
     """
-    Classifies a single data-point. Returns the predicted integer label.
+    Computes the a posteriori probability p(wi|x) for each class wi by dividing
+    the number of votes of each label among the k nearest neighbors by K.
+    """
+    # Compute label votes for k nearest neighbors.
+    knn_label_votes = self.knn_label_votes(x)
+
+    # p(wi|x) = num_votes(wi)/K. Map label index into probability.
+    return np.array(list(map(
+      lambda label: knn_label_votes.get(label, 0) / float(self.K),
+      range(self.num_classes),
+    )))
+
+  def knn_label_votes(self, x):
+    """
+    Finds the k nearest neighbors, and counts their labels. Returns a dict
+    mapping each label to their count.
     """
     # Evaluate the distance L2 of x to all training points.
     dist  = np.linalg.norm(x - self.x_train, axis=1)
+    
+    # Compute the indices of the k nearest points (with respect to x_train).
+    # Use negative distances to force min-heap behave like a max-heap.
+    nearest_k_indices = []
+    for i in range(len(dist)):
+      heapq.heappush(nearest_k_indices, (-dist[i], i))
+      if len(nearest_k_indices) > self.K: heapq.heappop(nearest_k_indices)
 
-    # Compute indices of the k nearest points (with respect to training_data).
-    nearest_k_indices = np.argpartition(dist, kth=self.K)
-
-    # Majority wins.
-    count = {}
-    for label in [self.w_train[k] for k in nearest_k_indices]:
-      count[label] = count.get(label, 0) + 1
-    return max(count, key=count.get)
+    # Count number of votes for each label.
+    label_votes = {}
+    for label in [self.w_train[k] for (_, k) in nearest_k_indices]:
+      label_votes[label] = label_votes.get(label, 0) + 1
+    return label_votes
 
   def evaluate(self, x_test, w_test):
     """
