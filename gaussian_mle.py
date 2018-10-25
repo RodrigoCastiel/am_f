@@ -9,9 +9,9 @@ Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 
 import numpy as np
 from data_loader import DataLoader
-from sklearn.base import BaseEstimator, ClassifierMixin
+from committee_classifier_base import CommitteeClassifierBase
 
-class GaussianMLE(BaseEstimator, ClassifierMixin):
+class GaussianMLE(CommitteeClassifierBase):
   def __init__(self):
     # Prior probabilities p(w_i) for each class w_i.
     self.p_w = []
@@ -76,6 +76,9 @@ class GaussianMLE(BaseEstimator, ClassifierMixin):
       return np.argmax(p_x_wi * self.p_w)
 
     return np.array(list(map(classify, x_set)))
+
+  def compute_a_priori(self):
+    return self.p_w
 
   def compute_a_posteriori(self, x):
     """
