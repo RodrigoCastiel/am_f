@@ -16,7 +16,7 @@ class GaussianMLE(BaseEstimator, ClassifierMixin):
     # Prior probabilities p(w_i) for each class w_i.
     self.p_w = []
     # Estimated means mi_i [N-array] for each class w_i.
-    self.mi = []
+    self.mu = []
     # Estimated variances sigma_i for each class w_i.
     self.sigma = []
     # Precomputed inverse variances (sigma_i^-1).
@@ -43,40 +43,64 @@ class GaussianMLE(BaseEstimator, ClassifierMixin):
 
     # Estimate mean and [diagonal] variances for each class w_i.
     # Pattern Classification (Second Edition), Section 3.2.3.
-    self.mi = np.array(list(map(
+    self.mu = np.array(list(map(
       lambda x_train_i: np.mean(x_train_i, axis=0),
       x_groups,
     )))
     self.sigma = np.array(list(map(
-      lambda i: np.mean((x_groups[i] - self.mi[i])**2, axis=0),
+      lambda i: np.mean((x_groups[i] - self.mu[i])**2, axis=0),
       range(len(x_groups)),
     )))
 
     # For the sake of optimization, we may precompute some constants in the 
     # gaussian pdf equations - the amplitudes and the inverse of sigma.
     epsilon = 1e-6
+    n = len(self.mu)
+    pi_const = np.power(2*np.pi, n/2.0)
     det_sigma = np.abs(np.product(self.sigma, axis=1))
     self.inv_sigma = 1.0/(self.sigma + epsilon)
-    self.amplitudes = 1.0/np.sqrt(det_sigma + epsilon)
+    self.amplitudes = 1.0/(pi_const * np.sqrt(det_sigma + epsilon))
 
     return self
 
   def predict(self, x_set):
     """
     Runs prediction/estimation for each point x in x_set. That is,
-    chooses the class that maximizes the scaled a posterior probability:
-        wj = argmax_wi { p(x_sample | w_i) p(w_i) }
-        (excluding p(x) from the denominator).
+    chooses the class that maximuzes the scaled a posterior probability:
+        wj = argmax_wi { p(x_sample | wi) p(wi) }
+        (excluding p(x) from the denomunator).
     Returns an array containing the predicted classes for each input point.
     """
     def classify(x_sample):
-      p_wi_x = self.compute_likelihoods(x_sample)
-      return np.argmax(p_wi_x * self.p_w)
+      p_x_wi = self.compute_likelihoods(x_sample)
+      return np.argmax(p_x_wi * self.p_w)
 
-    return np.array(list(map(
-      lambda x: classify(x),
-      x_set,
-    )))
+    return np.array(list(map(classify, x_set)))
+
+  def compute_a_posteriori(self, x):
+    """
+    Computes the a posteriori probability p(wi|x) for each class wi, given by:
+      p(wi|x) = [p(x|wi)p(wi)] / sum_k(p(x|wk)p(wk))
+    Or simply:
+      p(wi|x) = p(x|wi)p(wi) / p(x).
+    """
+    # Likelihood: p(x|wi).
+    p_x_wi = self.compute_likelihoods(x)
+    # A priori probability: p(wi).
+    p_wi = self.p_w
+    # Joint proability p(x && wi).
+    p_x_and_wi = p_x_wi * p_wi
+
+    return p_x_and_wi / np.sum(p_x_and_wi)
+
+  def compute_likelihoods(self, x):
+    """
+    Computes the likelihood of x for each class w_k, using the gaussian pdf.
+    Returns the numpy array [p(x|w1), p(x|w2), ...].
+    """
+    A = self.amplitudes
+    mu, sigma_inv = self.mu, self.inv_sigma
+    return A * np.exp(-0.5 * np.sum(sigma_inv * (x - mu)**2, axis=1))
 
   def evaluate(self, x_test, w_test):
     """
@@ -87,13 +111,3 @@ class GaussianMLE(BaseEstimator, ClassifierMixin):
     num_correct_predictions = np.sum(w_est == np.array(w_test))
     accuracy = num_correct_predictions/float(len(w_est))
     return (num_correct_predictions, accuracy)
-
-  def compute_likelihoods(self, x):
-    """
-    Computes the likelihood p(x|w_k) for each class w_k.
-    It does NOT consider the constant (2pi)^(-n/2) in the gaussian formula.
-    Returns the numpy array [p(x|w1), p(x|w2), ...].
-    """
-    A = self.amplitudes
-    mi, sigma_i_inv = self.mi, self.inv_sigma
-    return A * np.exp(-0.5 * np.sum(sigma_i_inv * (x - mi)**2, axis=1))

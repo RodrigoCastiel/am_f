@@ -1,4 +1,6 @@
 """
+This modules defines class KNNClassifier, a parametric KNN estimator for general
+n-dimensional datasets.
 Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 """
 
@@ -30,6 +32,8 @@ class KNNClassifier(BaseEstimator, ClassifierMixin):
       x_groups,
     )))
 
+    return self
+
   def predict(self, x_set):
     """
     Runs KNN prediction/estimation for each point x in x_set.
@@ -40,6 +44,10 @@ class KNNClassifier(BaseEstimator, ClassifierMixin):
       x_set,
     )))
 
+  def compute_a_posteriori(self, x):
+    # TODO(RodrigoCastiel): estimate p(wi|x) through the number of votes in KNN.
+    pass
+
   def classify(self, x):
     """
     Classifies a single data-point. Returns the predicted integer label.
@@ -47,7 +55,7 @@ class KNNClassifier(BaseEstimator, ClassifierMixin):
     # Evaluate the distance L2 of x to all training points.
     dist  = np.linalg.norm(x - self.x_train, axis=1)
 
-    # Compute indices of k nearest points (with respect to training_data).
+    # Compute indices of the k nearest points (with respect to training_data).
     nearest_k_indices = np.argpartition(dist, kth=self.K)
 
     # Majority wins.
