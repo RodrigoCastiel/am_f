@@ -26,12 +26,8 @@ class KNNClassifier(CommitteeClassifierBase):
     self.x_train = x_train
     self.w_train = w_train
 
-    # Estimate a prior probabilities p(w_i) for each class w_i.
-    x_groups = DataLoader.group_by_label(x_train, w_train)
-    self.p_w = np.array(list(map(
-      lambda x_train_k: len(x_train_k)/len(x_train),
-      x_groups,
-    )))
+    # Estimate a prior probabilities p(wi) for each class wi.
+    self.p_w = DataLoader.compute_a_priori(w_train)
     self.num_classes = len(self.p_w)
 
     return self

@@ -135,8 +135,21 @@ class DataLoader:
         np.array(
           [x_data[i] for i in range(num_samples) if w_data[i] == label_k]
         ),
-      list(range(num_classes)),
+      range(num_classes),
     ))
+
+  @staticmethod
+  def compute_a_priori(w_data):
+    """
+    Computes a priori probability p(wi) for each class wi in w_data.
+    Returns an np.array [p(w1), p(w2), ..., p(pN)].
+    """
+    classes, counts = np.unique(w_data, return_counts=True)
+    num_classes = len(classes)
+    return np.array(list(map(
+      lambda label_k: counts[label_k]/float(num_classes),
+      range(num_classes),
+  )))
 
   @staticmethod
   def load_samples(filepath, lookup_labels):

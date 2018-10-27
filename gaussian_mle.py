@@ -36,10 +36,7 @@ class GaussianMLE(CommitteeClassifierBase):
     x_groups = DataLoader.group_by_label(x_train, w_train)
 
     # Estimate a prior probabilities p(w_i) for each class w_i.
-    self.p_w = np.array(list(map(
-      lambda x_train_k: len(x_train_k)/len(x_train),
-      x_groups,
-    )))
+    self.p_w = DataLoader.compute_a_priori(w_train)
 
     # Estimate mean and [diagonal] variances for each class w_i.
     # Pattern Classification (Second Edition), Section 3.2.3.
