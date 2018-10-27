@@ -35,7 +35,7 @@ class GaussianMLE(CommitteeClassifierBase):
     # Break down dataset into smaller groups sharing the same label.
     x_groups = DataLoader.group_by_label(x_train, w_train)
 
-    # Estimate a prior probabilities p(w_i) for each class w_i.
+    # Estimate a prior probabilities p(wi) for each class wi.
     self.p_w = DataLoader.compute_a_priori(w_train)
 
     # Estimate mean and [diagonal] variances for each class w_i.

@@ -21,11 +21,9 @@ def main():
   knn_classifier = KNNClassifier(K = 1)
   knn_classifier.fit(x_train, w_train)
 
-  view_1 = list(range(0, 9))
-  view_2 = list(range(9, 19))
-  view_3 = list(range(19))
   K = 5
-  combined_max_classifier = CombinedMaxClassifier(K, view_1, view_2, view_3)
+  views = [list(range(0, 9)), list(range(9, 19)), list(range(19))]
+  combined_max_classifier = CombinedMaxClassifier(K, views)
   combined_max_classifier.fit(x_train, w_train)
 
   # Evaluate estimators on test set.
