@@ -17,6 +17,9 @@ class KNNClassifier(CommitteeClassifierBase):
     self.p_w = []
     self.num_classes = 0
 
+  def get_name(self):
+    return "KNN Classifier (K = %d)" % (self.K)
+
   def fit(self, x_train, w_train):
     """
     Stores training points *x_train* and their correponsindg labels *w_train*,

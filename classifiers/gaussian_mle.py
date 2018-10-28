@@ -24,6 +24,9 @@ class GaussianMLE(CommitteeClassifierBase):
     # Precomputed amplitudes for the gaussian pdfs.
     self.amplitudes = []
 
+  def get_name(self):
+    return "Gaussian MLE"
+
   def fit(self, x_train, w_train):
     """
     Estimates a prior probabilities p(w_i), the mean i and the variance i for

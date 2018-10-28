@@ -26,6 +26,9 @@ class CombinedMaxClassifier(BaseEstimator, ClassifierMixin):
     # testing GaussianMLE and KNN over different views (specified by views).
     self.L = len(views)
 
+    # Hyper-parameter for its internal KNN classifiers.
+    self.K = K
+
   def fit(self, x_train, w_train):
     # Train all committee classifiers with their corresponding views.
     for (classifier, view) in self.committee:
@@ -35,6 +38,9 @@ class CombinedMaxClassifier(BaseEstimator, ClassifierMixin):
     self.p_w = DataLoader.compute_a_priori(w_train)
 
     return self
+
+  def get_name(self):
+    return "Combined-Max Classifier (K = %d)" % (self.K)
 
   def predict(self, x_set):
     def classify(x):

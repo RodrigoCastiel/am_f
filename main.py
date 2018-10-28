@@ -8,34 +8,6 @@ from classifiers.gaussian_mle import GaussianMLE
 from classifiers.knn_classifier import KNNClassifier
 from classifiers.combined_max_classifier import CombinedMaxClassifier
 
-def evaluate_accuracy_on_test_set(
-  data_loader, 
-  gaussian_mle,
-  knn_classifier, 
-  combined_model
-):
-  # Evaluate estimators on test set.
-  x_test, w_test = data_loader.test_data()
-  num_hits_g, accuracy_g = gaussian_mle.evaluate(x_test, w_test)
-  num_hits_k, accuracy_k = knn_classifier.evaluate(x_test, w_test)
-  num_hits_c, accuracy_c = combined_model.evaluate(x_test, w_test)
-  data_size = len(w_test)
-
-  # Output data.
-  print("Classifier         Accuracy")
-  print(
-    "Gaussian MLE ..... %lf%% (%d/%d)"
-    %(100.0*accuracy_g, num_hits_g, data_size)
-  )
-  print(
-    "KNN .............. %lf%% (%d/%d)"
-    %(100.0*accuracy_k, num_hits_k, data_size)
-  )
-  print(
-    "Combined Max ..... %lf%% (%d/%d)"
-    %(100.0*accuracy_c, num_hits_c, data_size)
-  )
-
 def main():
   # Set seed for deterministic execution.
   np.random.seed(0)
@@ -45,27 +17,65 @@ def main():
   loader.load("data/segmentation")
   x_train, w_train  = loader.training_data()
 
-  # Construct and train gaussian maximum likelihood estimator.
-  gaussian_mle = GaussianMLE()
-  gaussian_mle.fit(x_train, w_train)
-
-  # Construct and train KNN classifier.
-  knn_classifier = KNNClassifier(K = 1)
-  knn_classifier.fit(x_train, w_train)
-
-  # Construct and train the combined model classifier.
-  K = 5
-  views = [list(range(0, 9)), list(range(9, 19)), list(range(19))]
-  combined_max_classifier = CombinedMaxClassifier(K, views)
-  combined_max_classifier.fit(x_train, w_train)
+  # Build and train classifiers with the optimal hyper-parameters.
+  gaussian_mle = train_gaussian_mle(x_train, w_train)
+  knn_classifier = train_knn_classifier(x_train, w_train)
+  combined_max_classifier = train_combined_classifier(x_train, w_train)
 
   # Evaluate overall accuracy of estimators on test data.
-  evaluate_accuracy_on_test_set(
-    loader,
+  classifiers = [
     gaussian_mle,
     knn_classifier,
     combined_max_classifier,
-  )
+  ]
+  evaluate_accuracy_on_test_set(loader, classifiers)
+
+def train_gaussian_mle(x_train, w_train):
+  """
+  Constructs and trains a Gaussian Maximum Likelihood Estimator.
+  """
+  return GaussianMLE().fit(x_train, w_train)
+
+def train_knn_classifier(x_train, w_train):
+  """
+  Constructs and trains a KNN Classifier.
+  """
+  knn_classifier = KNNClassifier(K = 1)
+  knn_classifier.fit(x_train, w_train)
+  return knn_classifier
+
+def train_combined_classifier(x_train, w_train):
+  """
+  Construct and train the combined model classifier.
+  """
+  K = 5
+  views = [[0], list(range(0, 9)), list(range(9, 19)), list(range(19))]
+  combined_max_classifier = CombinedMaxClassifier(K, views)
+  combined_max_classifier.fit(x_train, w_train)
+  return combined_max_classifier
+
+def evaluate_accuracy_on_test_set(data_loader, classifiers):
+  # Evaluate estimators on test set.
+  x_test, w_test = data_loader.test_data()
+  data_size = len(w_test)
+
+  print("\n---------------- Accuracy Evaluation on Test Set -----------------")
+  print("Classifier" + " "*34 + "Accuracy")
+
+  max_len = 40
+  for classifier in classifiers:
+    # Evaluate the accuracy of each classifier on (x_test, w_test).
+    num_hits, accuracy = classifier.evaluate(x_test, w_test)
+
+    # Print out their results.
+    classifier_name = classifier.get_name()
+    num_dots = max_len - len(classifier_name)
+    print(
+      "+ %s %s %lf%% (%d/%d)"
+      %(classifier_name, num_dots*".", 100.0*accuracy, num_hits, data_size)
+    )
+
+  print("------------------------------------------------------------------\n")
 
 if __name__ == "__main__":
     main()
