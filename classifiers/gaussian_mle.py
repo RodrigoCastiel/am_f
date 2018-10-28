@@ -11,6 +11,8 @@ import numpy as np
 from core.data_loader import DataLoader
 from core.committee_classifier_base import CommitteeClassifierBase
 
+epsilon = 1e-7
+
 class GaussianMLE(CommitteeClassifierBase):
   def __init__(self):
     # Prior probabilities p(w_i) for each class w_i.
@@ -54,7 +56,6 @@ class GaussianMLE(CommitteeClassifierBase):
 
     # For the sake of optimization, we may precompute some constants in the 
     # gaussian pdf equations - the amplitudes and the inverse of sigma.
-    epsilon = 1e-6
     n = len(self.mu)
     pi_const = np.power(2*np.pi, n/2.0)
     det_sigma = np.abs(np.product(self.sigma, axis=1))
@@ -94,7 +95,7 @@ class GaussianMLE(CommitteeClassifierBase):
     # Joint proability p(x && wi).
     p_x_and_wi = p_x_wi * p_wi
 
-    return p_x_and_wi / np.sum(p_x_and_wi)
+    return p_x_and_wi / np.sum(p_x_and_wi + epsilon)
 
   def compute_likelihoods(self, x):
     """

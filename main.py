@@ -3,14 +3,20 @@ Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 """
 
 import numpy as np
+
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import StratifiedKFold
+import sklearn.utils
+
 from core.data_loader import DataLoader
 from classifiers.gaussian_mle import GaussianMLE
 from classifiers.knn_classifier import KNNClassifier
 from classifiers.combined_max_classifier import CombinedMaxClassifier
 
-from sklearn.model_selection import GridSearchCV
-
 num_folds_cv = 10
+num_times_cv = 30
 
 def main():
   # Set seed for deterministic execution.
@@ -27,7 +33,8 @@ def main():
   combined_max_classifier = train_combined_classifier(x_train, w_train)
   classifiers = [gaussian_mle, knn_classifier, combined_max_classifier]
 
-  # Evaluate overall accuracy of estimators on test data.
+  # Evaluate estimators.
+  evaluate_cross_validation(classifiers, x_train, w_train)
   evaluate_accuracy_on_test_set(loader, classifiers)
 
 def train_gaussian_mle(x_train, w_train):
@@ -68,21 +75,65 @@ def train_combined_classifier(x_train, w_train):
     cv=num_folds_cv,
   )
   grid_search.fit(x_train, w_train)
-  K_optimal = grid_search.best_params_['K']
+  K_optimal = 7 #grid_search.best_params_['K']
 
   # Build classifier with optimal K.
   return CombinedMaxClassifier(K_optimal, views).fit(x_train, w_train)
 
+
+def perform_cross_validation(classifier, x_train, w_train):
+  """
+  Runs cross validation *num_times_cv* times on *classifier*. Returns the
+  average accuracy, and its error margin for a 95%-confidence interval.
+  Reference:
+  http://scikit-learn.org/stable/modules/cross_validation.html#cross-validation
+  """
+  accuracy_cv = []
+  for i in range(num_times_cv):
+    x_test, y_test = sklearn.utils.shuffle(x_train, w_train, random_state=i)
+    skf = StratifiedKFold(n_splits=num_folds_cv)
+    accuracy_cv.extend(list(cross_val_score(
+      classifier, x_test, y_test, scoring='accuracy', cv=skf, n_jobs=-1
+    )))
+
+  avg_accuracy = np.mean(accuracy_cv)
+  error_margin = 2*np.std(accuracy_cv)
+
+  return (avg_accuracy, error_margin)
+
+  # return (avg, error_margin)
+
+def evaluate_cross_validation(classifiers, x_train, w_train):
+  print(
+    "\n------------------- %02dx %02d-fold Cross-Validation ---------------------"
+    % (num_times_cv, num_folds_cv)
+  )
+  print("Classifier" + " "*34 + "Accuracy")
+
+  max_len = 40
+  for classifier in classifiers:
+    # Perform cross-validation on training set.
+    accuracy, margin = perform_cross_validation(classifier, x_train, w_train)
+
+    # Print out their results.
+    classifier_name = classifier.get_name()
+    num_dots = max_len - len(classifier_name)
+    print(
+      "+ %s %s %lf%% (+/-%lf%%)"
+      %(classifier_name, num_dots*".", 100.0*accuracy, 100.0*margin)
+    )
+
+  print("-"*70 + "\n")
 
 def evaluate_accuracy_on_test_set(data_loader, classifiers):
   # Evaluate estimators on test set.
   x_test, w_test = data_loader.test_data()
   data_size = len(w_test)
 
-  print("\n---------------- Accuracy Evaluation on Test Set -----------------")
-  print("Classifier" + " "*34 + "Accuracy")
+  print("\n------------------ Accuracy Evaluation on Test Set -------------------")
+  print("Classifier" + " "*38 + "Accuracy")
 
-  max_len = 40
+  max_len = 44
   for classifier in classifiers:
     # Evaluate the accuracy of each classifier on (x_test, w_test).
     num_hits, accuracy = classifier.evaluate(x_test, w_test)
@@ -95,7 +146,7 @@ def evaluate_accuracy_on_test_set(data_loader, classifiers):
       %(classifier_name, num_dots*".", 100.0*accuracy, num_hits, data_size)
     )
 
-  print("------------------------------------------------------------------\n")
+  print("-"*70 + "\n")
 
 if __name__ == "__main__":
     main()
