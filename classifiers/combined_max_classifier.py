@@ -11,7 +11,7 @@ from classifiers.gaussian_mle import GaussianMLE
 from classifiers.knn_classifier import KNNClassifier
 
 class CombinedMaxClassifier(BaseEstimator, ClassifierMixin):
-  def __init__(self, K, views):
+  def __init__(self, K = 1, views = [[0]]):
     def classifier(name):
       return GaussianMLE() if name == "gaussian_mle" else KNNClassifier(K)
 
@@ -24,6 +24,7 @@ class CombinedMaxClassifier(BaseEstimator, ClassifierMixin):
 
     # A view is a subset of features, defined by a list of indices. Here, we are
     # testing GaussianMLE and KNN over different views (specified by views).
+    self.views = views
     self.L = len(views)
 
     # Hyper-parameter for its internal KNN classifiers.

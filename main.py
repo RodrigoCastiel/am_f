@@ -8,6 +8,10 @@ from classifiers.gaussian_mle import GaussianMLE
 from classifiers.knn_classifier import KNNClassifier
 from classifiers.combined_max_classifier import CombinedMaxClassifier
 
+from sklearn.model_selection import GridSearchCV
+
+num_folds_cv = 10
+
 def main():
   # Set seed for deterministic execution.
   np.random.seed(0)
@@ -21,13 +25,9 @@ def main():
   gaussian_mle = train_gaussian_mle(x_train, w_train)
   knn_classifier = train_knn_classifier(x_train, w_train)
   combined_max_classifier = train_combined_classifier(x_train, w_train)
+  classifiers = [gaussian_mle, knn_classifier, combined_max_classifier]
 
   # Evaluate overall accuracy of estimators on test data.
-  classifiers = [
-    gaussian_mle,
-    knn_classifier,
-    combined_max_classifier,
-  ]
   evaluate_accuracy_on_test_set(loader, classifiers)
 
 def train_gaussian_mle(x_train, w_train):
@@ -36,23 +36,43 @@ def train_gaussian_mle(x_train, w_train):
   """
   return GaussianMLE().fit(x_train, w_train)
 
+
 def train_knn_classifier(x_train, w_train):
   """
-  Constructs and trains a KNN Classifier.
+  Constructs, finds the optimal hyper-parameter K via grid-search, and returns
+  a trained KNN Classifier.
   """
-  knn_classifier = KNNClassifier(K = 1)
-  knn_classifier.fit(x_train, w_train)
-  return knn_classifier
+  # Perform grid-search to find the optimal K value.
+  K_values = [1, 3, 5, 7, 9, 13, 15, 17, 19]
+  grid_search = GridSearchCV(KNNClassifier(), {'K': K_values}, n_jobs=-1)
+  grid_search.fit(x_train, w_train)
+  K_optimal = grid_search.best_params_['K']
+
+  # Build classifier with optimal K.
+  return KNNClassifier(K_optimal).fit(x_train, w_train)
+
 
 def train_combined_classifier(x_train, w_train):
   """
-  Construct and train the combined model classifier.
+  Constructs, finds the optimal hyper-parameter K via grid-search, and returns
+  a trained combined-max classifier.
   """
-  K = 5
-  views = [[0], list(range(0, 9)), list(range(9, 19)), list(range(19))]
-  combined_max_classifier = CombinedMaxClassifier(K, views)
-  combined_max_classifier.fit(x_train, w_train)
-  return combined_max_classifier
+  # Perform grid-search to find the optimal K value.
+  views = [list(range(0, 9)), list(range(9, 19)), list(range(19))]
+  K_values = [1, 3, 5, 7, 9, 13, 15, 17, 19]
+  grid_search = GridSearchCV(
+    CombinedMaxClassifier(views=views),
+    param_grid = {'K': K_values},
+    n_jobs=-1,
+    scoring='accuracy',
+    cv=num_folds_cv,
+  )
+  grid_search.fit(x_train, w_train)
+  K_optimal = grid_search.best_params_['K']
+
+  # Build classifier with optimal K.
+  return CombinedMaxClassifier(K_optimal, views).fit(x_train, w_train)
+
 
 def evaluate_accuracy_on_test_set(data_loader, classifiers):
   # Evaluate estimators on test set.
