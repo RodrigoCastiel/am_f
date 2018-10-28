@@ -6,8 +6,8 @@ Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 
 import numpy as np
 import heapq
-from data_loader import DataLoader
-from committee_classifier_base import CommitteeClassifierBase
+from core.data_loader import DataLoader
+from core.committee_classifier_base import CommitteeClassifierBase
 
 class KNNClassifier(CommitteeClassifierBase):
   def __init__(self, K = 3):
@@ -43,9 +43,6 @@ class KNNClassifier(CommitteeClassifierBase):
       return max(label_votes, key=label_votes.get)
 
     return np.array(list(map(classify, x_set)))
-
-  def compute_a_priori(self):
-    return self.p_w
 
   def compute_a_posteriori(self, x):
     """

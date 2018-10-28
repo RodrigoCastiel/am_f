@@ -2,14 +2,13 @@
 Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 """
 
-import numpy as np
 import itertools
-
-from data_loader import DataLoader
-from gaussian_mle import GaussianMLE
-from knn_classifier import KNNClassifier
+import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
-from committee_classifier_base import CommitteeClassifierBase
+
+from core.data_loader import DataLoader
+from classifiers.gaussian_mle import GaussianMLE
+from classifiers.knn_classifier import KNNClassifier
 
 class CombinedMaxClassifier(BaseEstimator, ClassifierMixin):
   def __init__(self, K, views):

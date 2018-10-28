@@ -8,8 +8,8 @@ Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 """
 
 import numpy as np
-from data_loader import DataLoader
-from committee_classifier_base import CommitteeClassifierBase
+from core.data_loader import DataLoader
+from core.committee_classifier_base import CommitteeClassifierBase
 
 class GaussianMLE(CommitteeClassifierBase):
   def __init__(self):
