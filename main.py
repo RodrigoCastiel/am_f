@@ -3,20 +3,22 @@ Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 """
 
 import numpy as np
+import sklearn.utils
 
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import StratifiedKFold
-import sklearn.utils
 
 from core.data_loader import DataLoader
 from classifiers.gaussian_mle import GaussianMLE
 from classifiers.knn_classifier import KNNClassifier
 from classifiers.combined_max_classifier import CombinedMaxClassifier
 
+
 num_folds_cv = 10
 num_times_cv = 30
+
 
 def main():
   # Set seed for deterministic execution.
@@ -36,6 +38,7 @@ def main():
   # Evaluate estimators.
   evaluate_cross_validation(classifiers, x_train, w_train)
   evaluate_accuracy_on_test_set(loader, classifiers)
+
 
 def train_gaussian_mle(x_train, w_train):
   """
@@ -147,6 +150,7 @@ def evaluate_accuracy_on_test_set(data_loader, classifiers):
     )
 
   print("-"*70 + "\n")
+
 
 if __name__ == "__main__":
     main()
