@@ -39,23 +39,23 @@ class KMeansClustering:
     """
     return self.assignments
 
-  def cluster(self, x_set):
+  def fit(self, x_train):
     """
-    Groups x_set into K different clusters. x_set is a [N x d] matrix, where N
-    is the number of samples and d is their dimensionality. At the end,
+    Groups x_train into K different clusters. x_train is a [N x d] matrix, where
+    N is the number of samples and d is their dimensionality. At the end,
       a. self.clusters will store the groups of points by their indices.
       b. self.k_means will store the k-means coordinates.
       c. self.assigments will store which mean has been assigned to each point.
     """
     # Initialize means (Forgy's method - pick K random points).
-    N = len(x_set)
-    self.k_means = x_set[np.random.choice(N, self.K), :]
+    N = len(x_train)
+    self.k_means = x_train[np.random.choice(N, self.K), :]
     self.clusters = []
 
     # Iterative update step.
     for _ in range(max_iter):
-      # Assign nearest mean index for each point in x_set.
-      self.assignments = self.assign_means(x_set)
+      # Assign nearest mean index for each point in x_train.
+      self.assignments = self.assign(x_train)
       # Gather points assigned to the same mean.
       self.clusters = list(map(
         lambda mean_k: [i for i in range(N) if self.assignments[i] == mean_k],
@@ -63,7 +63,7 @@ class KMeansClustering:
       ))
       # Recompute k-means.
       k_means = np.array(list(map(
-        lambda cluster: np.mean(x_set[cluster, :], axis=0),
+        lambda cluster: np.mean(x_train[cluster, :], axis=0),
         self.clusters,
       )))
       # Stop condition.
@@ -73,7 +73,7 @@ class KMeansClustering:
 
     return self
 
-  def assign_means(self, x_set):
+  def assign(self, x_set):
     """
     Assigns a mean to each point in x_set. Uses the current self.k_means member.
     Returns an N-array containing the indices of the assigned means.
