@@ -31,7 +31,9 @@ class KCM_F_GH_Clustering:
     # Squared inverse of width hyper-parameter.
     self.inv_s2 = []
     # Training points used in clustering.
-    self.x_set = []
+    self.x_train = []
+    # Training point labels.
+    self.w_train = []
     # Initial value of 1/sigma^2.
     self.inv_squared_sigma = 1.0
 
@@ -43,13 +45,16 @@ class KCM_F_GH_Clustering:
     """
     return self.assignments
 
-  def fit(self, x_train):
+  def fit(self, x_train, w_train):
     """
     Groups x_train into c different clusters. x_train is a [N x p] matrix, where
     N is the number of samples and p is their dimensionality. At the end,
       a. self.clusters will store the groups of points by their indices.
       b. self.assigments will store which mean has been assigned to each point.
     """
+    self.x_train = x_train
+    self.w_train = w_train
+
     N = len(x_train)
     # Estimate initial value of (1/s^2).
     self.inv_s2 = KCM_F_GH_Clustering.estimate_initial_s_parameter(x_train)
@@ -65,7 +70,7 @@ class KCM_F_GH_Clustering:
     for i in range(max_iter):
       print(i)
       # Update hyper-paramater s (equation (24)).
-      self.inv_s2 = self.update_s_parameter(x_train)
+      self.inv_s2 = self.update_s_parameter()
       # Reassign points.
       assignments = self.assign(x_train)
       # Stop condition: assignments haven't changed.
@@ -77,6 +82,9 @@ class KCM_F_GH_Clustering:
 
     return self
 
+  def predict(self, x_set):
+    pass
+
   def assign(self, x_set):
     """
     Assigns each point xk in *x_set* to a cluster i, where i = 0..(c-1).
@@ -85,6 +93,8 @@ class KCM_F_GH_Clustering:
     the nearest cluster i.
     """
     N = x_set.shape[0]
+    x_train = self.x_train
+
     def dist_to_cluster(cluster_i):
       """
       Returns the distance of each point xk in x_set to the cluster i. That is,
@@ -95,11 +105,12 @@ class KCM_F_GH_Clustering:
       # Build all unique ordered pairs (r, s) to compute Sum Sum kernel(xr, xs).
       pairs = itertools.product(cluster_i, repeat=2)
       sum_kernel_xr_xs = np.sum(
-        [self.kernel(x_set[r], x_set[s]) for (r, s) in pairs if r < s],
+        [self.kernel(x_train[r], x_train[s]) for (r, s) in pairs if r < s],
       )
       # Compute K(xk, xl) for all xk in x_set and all xl in cluster i.
       sum_kernel_xk_xl = np.array(list(map(
-        lambda k: np.sum([self.kernel(x_set[k], x_set[l]) for l in cluster_i]),
+        lambda k:
+          np.sum([self.kernel(x_set[k], x_train[l]) for l in cluster_i]),
         range(N),
       )))
       # Equation (21).
@@ -120,26 +131,28 @@ class KCM_F_GH_Clustering:
     """
     return np.exp(-0.5 * np.sum((xl - xk)**2 * self.inv_s2))
 
-  def update_s_parameter(self, x_set):
+  def update_s_parameter(self):
     """
     Recomputes new value for the width parameter s, given the current clusters.
     Returns 1/s^2, a p-dimensional vector, where p is the number of features.
     """
+    x_train = self.x_train
+
     # Number of features of the training data.
-    p = x_set.shape[1]
+    p = x_train.shape[1]
     # Initialize the pi_h term.
     pi_h = np.zeros(p)
 
-    # Calculate the denominator of Equation 24 for each dimension j.
+    # Calculate the denominator of Equation (24) for each dimension j.
     for j in range(p):
       for cluster_i in self.clusters:
         # Number of points in the cluster.
         Pi = len(cluster_i)
         # Find all combinations of elements of the cluster.
         pairs = itertools.product(cluster_i, cluster_i)
-        # Calculate the pi_j (for j = 1...p)
+        # Update pi_h.
         pi_h[j] += 1/Pi * np.sum(
-          [ self.kernel(x_set[r], x_set[s]) * (x_set[r][j] - x_set[s][j])**2
+          [ self.kernel(x_train[r], x_train[s])*(x_train[r][j]-x_train[s][j])**2
             for (r, s) in pairs
           ],
         )

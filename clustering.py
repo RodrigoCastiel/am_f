@@ -19,14 +19,14 @@ def main():
   K = 2
   n_samples = 100
   # X_data, _ = make_blobs(n_samples, centers=K, cluster_std=0.60, random_state=0)
-  X_data, _ = datasets.make_moons(n_samples=n_samples, noise=.05)
+  x_train, w_train = datasets.make_moons(n_samples=n_samples, noise=.05)
 
   # Run KCM-F-GH.
-  kcm_f_gh = KCM_F_GH_Clustering(c = K).fit(X_data)
+  kcm_f_gh = KCM_F_GH_Clustering(c = K).fit(x_train, w_train)
   kcm_f_gh_assignments = kcm_f_gh.get_assigments()
 
   # Run K-means.
-  k_means_clustering = KMeansClustering(K).fit(X_data)
+  k_means_clustering = KMeansClustering(K).fit(x_train)
   k_means_assignments = k_means_clustering.get_assigments()
 
   # Plot dataset and computed means.
@@ -36,9 +36,9 @@ def main():
   
   # Compare results.
   plt.subplot(1, 2, 1)
-  plt.scatter(X_data[:, 0], X_data[:, 1], marker='+', c=col_k_means)
+  plt.scatter(x_train[:, 0], x_train[:, 1], marker='+', c=col_k_means)
   plt.subplot(1, 2, 2)
-  plt.scatter(X_data[:, 0], X_data[:, 1], marker='+', c=col_kcm_f_gh)
+  plt.scatter(x_train[:, 0], x_train[:, 1], marker='+', c=col_kcm_f_gh)
   plt.show()
 
 
