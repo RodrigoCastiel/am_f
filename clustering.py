@@ -4,45 +4,41 @@ Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import datasets
+from sklearn.datasets.samples_generator import make_blobs
+
 from core.data_loader import DataLoader
 from classifiers.k_means_clustering import KMeansClustering
-
-
-def generate_random_data(num_groups, group_size, spread=0.1, d=2):
-  X_data = np.zeros((num_groups*group_size, d))
-  i = 0
-  for _ in range(num_groups):
-    mean = np.random.random((d))
-    std = spread*np.random.random((1))
-    for _ in range(group_size):
-      X_data[i, :] = mean + std*np.random.randn(d)
-      i += 1
-  np.random.shuffle(X_data)
-  return X_data
-
+from classifiers.kcm_f_gh_clustering import KCM_F_GH_Clustering
 
 def main():
   # Set seed for deterministic execution.
   np.random.seed(0)
 
   # Generate random dataset.
-  spread, d = 0.5, 2
-  K, group_size = 5, 100
-  X_data = generate_random_data(K, group_size, spread, d)
+  K = 2
+  n_samples = 100
+  # X_data, _ = make_blobs(n_samples, centers=K, cluster_std=0.60, random_state=0)
+  X_data, _ = datasets.make_moons(n_samples=n_samples, noise=.05)
+
+  # Run KCM-F-GH.
+  kcm_f_gh = KCM_F_GH_Clustering(c = K).fit(X_data)
+  kcm_f_gh_assignments = kcm_f_gh.get_assigments()
 
   # Run K-means.
-  k_means_clustering = KMeansClustering(K)
-  k_means_clustering.fit(X_data)
-  assignments = k_means_clustering.get_assigments()
-  k_means = k_means_clustering.get_cluster_means()
+  k_means_clustering = KMeansClustering(K).fit(X_data)
+  k_means_assignments = k_means_clustering.get_assigments()
 
   # Plot dataset and computed means.
   possible_colors = ['r', 'g', 'b', 'm', 'y']
-  data_colors = list(map(lambda k: possible_colors[k], assignments))
-  mean_colors = list(map(lambda k: possible_colors[k], range(K)))
-
-  plt.scatter(x=X_data[:, 0], y=X_data[:, 1], marker='+', c=data_colors)
-  plt.scatter(x=k_means[:, 0], y=k_means[:, 1], marker='o', c=mean_colors)
+  col_k_means = list(map(lambda k: possible_colors[k], k_means_assignments))
+  col_kcm_f_gh = list(map(lambda k: possible_colors[k], kcm_f_gh_assignments))
+  
+  # Compare results.
+  plt.subplot(1, 2, 1)
+  plt.scatter(X_data[:, 0], X_data[:, 1], marker='+', c=col_k_means)
+  plt.subplot(1, 2, 2)
+  plt.scatter(X_data[:, 0], X_data[:, 1], marker='+', c=col_kcm_f_gh)
   plt.show()
 
 

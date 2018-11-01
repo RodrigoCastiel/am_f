@@ -32,6 +32,8 @@ class KCM_F_GH_Clustering:
     self.inv_s2 = []
     # Training points used in clustering.
     self.x_set = []
+    # Initial value of 1/sigma^2.
+    self.inv_squared_sigma = 1.0
 
   def get_assigments(self):
     """
@@ -51,6 +53,7 @@ class KCM_F_GH_Clustering:
     N = len(x_train)
     # Estimate initial value of (1/s^2).
     self.inv_s2 = KCM_F_GH_Clustering.estimate_initial_s_parameter(x_train)
+    self.inv_squared_sigma = self.inv_s2[0]
     # Initialize c clusters, each with a randomly picked point (representative).
     self.clusters = list(map(lambda i: [i], random.sample(range(N), self.c)))
     # Assign clusters for each point in x_train (with current self.clusters).
@@ -59,8 +62,18 @@ class KCM_F_GH_Clustering:
     self.clusters = KCM_F_GH_Clustering.build_clusters(self.assignments, self.c)
 
     # Iterative update step.
-    for _ in range(max_iter):
-      break
+    for i in range(max_iter):
+      print(i)
+      # Update hyper-paramater s (equation (24)).
+      self.inv_s2 = self.update_s_parameter(x_train)
+      # Reassign points.
+      assignments = self.assign(x_train)
+      # Stop condition: assignments haven't changed.
+      if np.all(assignments == self.assignments):
+        break
+      # Update clusters.
+      self.clusters = KCM_F_GH_Clustering.build_clusters(assignments, self.c)
+      self.assignments = assignments
 
     return self
 
@@ -71,21 +84,34 @@ class KCM_F_GH_Clustering:
     clusters in feature space. That is, || phi(xk) - gi ||^2. Then, it chooses
     the nearest cluster i.
     """
-    def dist_to_cluster(i):
+    N = x_set.shape[0]
+    def dist_to_cluster(cluster_i):
       """
       Returns the distance of each point xk in x_set to the cluster i. That is,
         || phi(xk) - gi ||^2, equation (21).
       The returned array is [N x 1], where N is the number of points in x_set.
       """
-      return np.zeros((len(x_set)))
+      Pi = len(cluster_i)
+      # Build all unique ordered pairs (r, s) to compute Sum Sum kernel(xr, xs).
+      pairs = itertools.product(cluster_i, repeat=2)
+      sum_kernel_xr_xs = np.sum(
+        [self.kernel(x_set[r], x_set[s]) for (r, s) in pairs if r < s],
+      )
+      # Compute K(xk, xl) for all xk in x_set and all xl in cluster i.
+      sum_kernel_xk_xl = np.array(list(map(
+        lambda k: np.sum([self.kernel(x_set[k], x_set[l]) for l in cluster_i]),
+        range(N),
+      )))
+      # Equation (21).
+      return (1.0 - 2.0*sum_kernel_xk_xl/Pi + sum_kernel_xr_xs/Pi**2.0)
 
     # Compute distances in feature space, a [c x N] matrix. Each row i means the
     # distance between each point xj in x_set to cluster i.
-    distances = np.array(list(map(dist_to_cluster, range(self.c))))
+    distances = np.array(list(map(dist_to_cluster, self.clusters)))
 
     # Assign cluster with minimal distance to each point j. For each column 
     # (point j), we pick the row with the smallest distance.
-    return np.argmin(distances, axis=1)
+    return np.argmin(distances, axis=0)
 
   def kernel(self, xl, xk):
     """
@@ -93,6 +119,32 @@ class KCM_F_GH_Clustering:
     Equation (9).
     """
     return np.exp(-0.5 * np.sum((xl - xk)**2 * self.inv_s2))
+
+  def update_s_parameter(self, x_set):
+    """
+    Recomputes new value for the width parameter s, given the current clusters.
+    Returns 1/s^2, a p-dimensional vector, where p is the number of features.
+    """
+    # Number of features of the training data.
+    p = x_set.shape[1]
+    # Initialize the pi_h term.
+    pi_h = np.zeros(p)
+
+    # Calculate the denominator of Equation 24 for each dimension j.
+    for j in range(p):
+      for cluster_i in self.clusters:
+        # Number of points in the cluster.
+        Pi = len(cluster_i)
+        # Find all combinations of elements of the cluster.
+        pairs = itertools.product(cluster_i, cluster_i)
+        # Calculate the pi_j (for j = 1...p)
+        pi_h[j] += 1/Pi * np.sum(
+          [ self.kernel(x_set[r], x_set[s]) * (x_set[r][j] - x_set[s][j])**2
+            for (r, s) in pairs
+          ],
+        )
+
+    return self.inv_squared_sigma * np.power(np.prod(pi_h), 1.0/p)/pi_h
 
   @staticmethod
   def estimate_initial_s_parameter(x_train):
@@ -107,10 +159,10 @@ class KCM_F_GH_Clustering:
     idx = range(len(x_train))
     dists = [dist(i, j) for (i, j) in itertools.product(idx, idx) if i < j]
     p10, p90 = np.percentile(dists, [10., 90.])
-    avg = 0.5 * (p10 + p90)
+    inv_squared_sigma = 2.0 / (p10 + p90)
 
     # Return 1/s2.
-    return np.full((x_train.shape[1]), 1.0/avg)
+    return np.full((x_train.shape[1]), inv_squared_sigma)
 
   @staticmethod
   def build_clusters(assignments, c):
