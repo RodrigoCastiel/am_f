@@ -2,6 +2,7 @@
 Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 """
 
+import collections
 import itertools
 import numpy as np
 import random
@@ -36,6 +37,8 @@ class KCM_F_GH_Clustering:
     self.w_train = []
     # Initial value of 1/sigma^2.
     self.inv_squared_sigma = 1.0
+    # Verbose flag (to control output log).
+    self.verbose = True
 
   def get_assigments(self):
     """
@@ -52,10 +55,13 @@ class KCM_F_GH_Clustering:
       a. self.clusters will store the groups of points by their indices.
       b. self.assigments will store which mean has been assigned to each point.
     """
+    N = len(x_train)
     self.x_train = x_train
     self.w_train = w_train
 
-    N = len(x_train)
+    self.log("KCM_F_GH (c = %d, #training_points = %d)\n" % (self.c, N))
+    self.log("Start. Iteration:")
+
     # Estimate initial value of (1/s^2).
     self.inv_s2 = KCM_F_GH_Clustering.estimate_initial_s_parameter(x_train)
     self.inv_squared_sigma = self.inv_s2[0]
@@ -68,7 +74,7 @@ class KCM_F_GH_Clustering:
 
     # Iterative update step.
     for i in range(max_iter):
-      print(i)
+      self.log(" %d" % (i))
       # Update hyper-paramater s (equation (24)).
       self.inv_s2 = self.update_s_parameter()
       # Reassign points.
@@ -80,10 +86,15 @@ class KCM_F_GH_Clustering:
       self.clusters = KCM_F_GH_Clustering.build_clusters(assignments, self.c)
       self.assignments = assignments
 
+    self.log(". Finish.\n")
     return self
 
   def predict(self, x_set):
-    pass
+    """
+    Assigns each point xk in *x_set* to a cluster i. Returns an N-array of ints,
+    meaning the cluster index for each one of the N input points.
+    """
+    return self.assign(x_set)
 
   def assign(self, x_set):
     """
@@ -159,6 +170,10 @@ class KCM_F_GH_Clustering:
 
     return self.inv_squared_sigma * np.power(np.prod(pi_h), 1.0/p)/pi_h
 
+  def log(self, text, **kwargs):
+    if self.verbose:
+      print(text, end='', flush=True)
+
   @staticmethod
   def estimate_initial_s_parameter(x_train):
     """
@@ -193,3 +208,4 @@ class KCM_F_GH_Clustering:
       lambda cluster: [i for i in range(N) if assignments[i] == cluster],
       range(c),
     ))
+  

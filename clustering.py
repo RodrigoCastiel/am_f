@@ -5,6 +5,7 @@ Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn import datasets
+from sklearn import metrics
 from sklearn.datasets.samples_generator import make_blobs
 
 from core.data_loader import DataLoader
@@ -16,14 +17,16 @@ def main():
   np.random.seed(0)
 
   # Generate random dataset.
-  K = 2
+  K = 4
   n_samples = 100
-  # X_data, _ = make_blobs(n_samples, centers=K, cluster_std=0.60, random_state=0)
-  x_train, w_train = datasets.make_moons(n_samples=n_samples, noise=.05)
+  x_train, w_train = make_blobs(n_samples, centers=K, cluster_std=.5, random_state=0)
+  # x_train, w_train = datasets.make_moons(n_samples=n_samples, noise=.05)
 
   # Run KCM-F-GH.
   kcm_f_gh = KCM_F_GH_Clustering(c = K).fit(x_train, w_train)
   kcm_f_gh_assignments = kcm_f_gh.get_assigments()
+  rand_score = metrics.adjusted_rand_score(w_train, kcm_f_gh_assignments)
+  print("Adjusted rand score: ", rand_score)
 
   # Run K-means.
   k_means_clustering = KMeansClustering(K).fit(x_train)
