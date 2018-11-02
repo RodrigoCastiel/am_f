@@ -47,6 +47,9 @@ def main():
   evaluate_cross_validation(classifiers, x_train, w_train)
   evaluate_accuracy_on_test_set(loader, classifiers)
 
+  # Perform Friedman's Test.
+  perform_friedman_test(classifiers, x_train, w_train)
+
 
 def train_gaussian_mle(x_train, w_train):
   """
@@ -104,7 +107,7 @@ def perform_cross_validation(classifier, x_train, w_train):
     x_test, y_test = sklearn.utils.shuffle(x_train, w_train, random_state=i)
     skf = StratifiedKFold(n_splits=num_folds_cv)
     accuracy_cv.extend(list(cross_val_score(
-      classifier, x_test, y_test, scoring='accuracy', cv=skf, n_jobs=-1
+      classifier, x_test, y_test, scoring='accuracy', cv=skf, n_jobs=-1,
     )))
 
   avg_accuracy = np.mean(accuracy_cv)
@@ -158,6 +161,65 @@ def evaluate_accuracy_on_test_set(data_loader, classifiers):
     )
 
   print("-"*70 + "\n")
+
+
+def perform_friedman_test(classifiers, x_data, w_data):
+  """
+  Performs Friendman's Test on input *classifiers*.
+  Reference: https://en.wikipedia.org/wiki/Friedman_test).
+  Based on Marcel Santos's implementation.
+  """
+  N = num_times_cv
+  k = len(classifiers)
+
+  # Run cross validation N times for each classifier.
+  ntimes_folds = np.zeros((N, k))
+  for i, classifier in enumerate(classifiers):
+    for j in range(N):
+      x_shuffled, w_shuffled = sklearn.utils.shuffle(
+        x_data,
+        w_data,
+        random_state=j,
+      )
+      skf = StratifiedKFold(n_splits=num_folds_cv)
+      ntimes_folds[j, i] = np.mean(cross_val_score(
+        classifier,
+        x_shuffled,
+        w_shuffled,
+        scoring='accuracy',
+        cv=skf,
+        n_jobs=-1,
+      ))
+
+  # Friedman test.
+  ntimes_folds = np.argsort(ntimes_folds) + 1
+  ranks = np.sum(ntimes_folds, axis=0)/N
+  ranks_ = ranks - (k+1)/2
+
+  # If k = 3, Q can be approximated to a 95%-confidence qui-squared.
+  Q = (12*N/(k*(k+1))) * np.sum(ranks_ ** 2)
+  
+  print("\n---------------------------- Friedman Test  ------------------------------")
+  if Q > 5.991:
+    print("Reject H0. The classifiers are not equivalent.")
+
+    # Compare classifiers.
+    CD =  2.344 * np.sqrt((k*(k+1))/(6 * N))
+    for i in range(k):
+      for j in range(i+1, k):
+        if np.abs(ranks[i] - ranks[j]) >= CD:
+          print(
+            "> %s is different from %s."
+            % (classifiers[i].get_name(), classifiers[j].get_name())
+          )
+        else:
+          print(
+            "> %s is equivalent to %s."
+            % (classifiers[i].get_name(), classifiers[j].get_name())
+          )
+  else:
+    print("Do not reject H0. All classifiers are equivalent.")
+  print("-"*74 + "\n")
 
 
 if __name__ == "__main__":
