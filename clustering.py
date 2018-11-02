@@ -4,6 +4,7 @@ Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 from sklearn import datasets
 from sklearn import metrics
 from sklearn.datasets.samples_generator import make_blobs
@@ -14,12 +15,13 @@ from classifiers.kcm_f_gh_clustering import KCM_F_GH_Clustering
 
 def main():
   # Set seed for deterministic execution.
+  random.seed(0)
   np.random.seed(0)
 
   # Generate random dataset.
   K = 4
   n_samples = 100
-  x_train, w_train = make_blobs(n_samples, centers=K, cluster_std=.5, random_state=0)
+  x_train, w_train = make_blobs(n_samples, centers=K, cluster_std=.9, random_state=0)
   # x_train, w_train = datasets.make_moons(n_samples=n_samples, noise=.05)
 
   # Run KCM-F-GH.

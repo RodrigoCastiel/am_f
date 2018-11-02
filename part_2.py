@@ -3,6 +3,7 @@ Author: Rodrigo Castiel, Federal University of Pernambuco (UFPE).
 """
 
 import numpy as np
+import random
 import sklearn.utils
 
 from sklearn.metrics import accuracy_score
@@ -21,7 +22,14 @@ num_times_cv = 30
 
 
 def main():
+  print("+--------------------------------------+")
+  print("|   Machine Learning Project, Part 2   |")
+  print("+--------------------------------------+")
+  print("|       Author: Rodrigo Castiel        |")
+  print("+--------------------------------------+")
+
   # Set seed for deterministic execution.
+  random.seed(0)
   np.random.seed(0)
 
   # Load training and test data.

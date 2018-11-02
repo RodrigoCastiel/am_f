@@ -23,6 +23,8 @@ class KMeansClustering:
     # N-array containing the indices of the assigned means for each point used
     # in the clustering.
     self.assignments = []
+    # If true, it will log clustering events.
+    self.verbose = True
 
   def get_cluster_means(self):
     """
@@ -52,8 +54,12 @@ class KMeansClustering:
     self.k_means = x_train[np.random.choice(N, self.K), :]
     self.clusters = []
 
+    self.log("+ K-means (k = %d, #training_points = %d)\n" % (self.K, N))
+    self.log("Start. Iteration:")
+
     # Iterative update step.
-    for _ in range(max_iter):
+    for i in range(max_iter):
+      self.log(" %d" % (i))
       # Assign nearest mean index for each point in x_train.
       self.assignments = self.assign(x_train)
       # Gather points assigned to the same mean.
@@ -71,6 +77,7 @@ class KMeansClustering:
         break
       self.k_means = k_means
 
+    self.log(". Finish.\n")
     return self
 
   def assign(self, x_set):
@@ -87,3 +94,7 @@ class KMeansClustering:
         lambda x: nearest_mean(x, self.k_means),
         x_set,
       )))
+
+  def log(self, text, **kwargs):
+    if self.verbose:
+      print(text, end='', flush=True)

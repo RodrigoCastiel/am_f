@@ -8,7 +8,7 @@ import numpy as np
 import random
 
 epsilon = 1e-6
-max_iter = 100
+max_iter = 30
 
 class KCM_F_GH_Clustering:
   """
@@ -59,7 +59,7 @@ class KCM_F_GH_Clustering:
     self.x_train = x_train
     self.w_train = w_train
 
-    self.log("KCM_F_GH (c = %d, #training_points = %d)\n" % (self.c, N))
+    self.log("+ KCM_F_GH (c = %d, #training_points = %d)\n" % (self.c, N))
     self.log("Start. Iteration:")
 
     # Estimate initial value of (1/s^2).
@@ -155,20 +155,20 @@ class KCM_F_GH_Clustering:
     pi_h = np.zeros(p)
 
     # Calculate the denominator of Equation (24) for each dimension j.
-    for j in range(p):
-      for cluster_i in self.clusters:
-        # Number of points in the cluster.
-        Pi = len(cluster_i)
-        # Find all combinations of elements of the cluster.
-        pairs = itertools.product(cluster_i, cluster_i)
+    for cluster_i in self.clusters:
+      # Number of points in the cluster.
+      Pi = len(cluster_i)
+      # "Pi choose 2": all possible pairs of points within each cluster.
+      pairs = list(itertools.product(cluster_i, cluster_i))
+      for j in range(p):
         # Update pi_h.
-        pi_h[j] += 1/Pi * np.sum(
+        pi_h[j] += 1.0/Pi * np.sum(
           [ self.kernel(x_train[r], x_train[s])*(x_train[r][j]-x_train[s][j])**2
-            for (r, s) in pairs
+            for (r, s) in pairs if r < s
           ],
         )
 
-    return self.inv_squared_sigma * np.power(np.prod(pi_h), 1.0/p)/pi_h
+    return self.inv_squared_sigma * np.prod(pi_h)**(1.0/p) / (pi_h + epsilon)
 
   def log(self, text, **kwargs):
     if self.verbose:
