@@ -33,7 +33,7 @@ class KMeansClustering:
     """
     return self.k_means
 
-  def get_assigments(self):
+  def get_assignments(self):
     """
     Returns an N-array containing the indices of the assigned means for the
     dataset used in the clustering. If the clustering hasn't been performed, 
@@ -54,7 +54,7 @@ class KMeansClustering:
     self.k_means = x_train[np.random.choice(N, self.K), :]
     self.clusters = []
 
-    self.log("+ K-means (k = %d, #training_points = %d)\n" % (self.K, N))
+    self.log("+ K-means (k = %d, #points = %d)\n" % (self.K, N))
     self.log("Start. Iteration:")
 
     # Iterative update step.
@@ -95,6 +95,6 @@ class KMeansClustering:
         x_set,
       )))
 
-  def log(self, text, **kwargs):
+  def log(self, text):
     if self.verbose:
       print(text, end='', flush=True)

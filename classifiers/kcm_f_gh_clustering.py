@@ -37,10 +37,24 @@ class KCM_F_GH_Clustering:
     self.w_train = []
     # Initial value of 1/sigma^2.
     self.inv_squared_sigma = 1.0
+    # Fit error: the objective function value at covergence.
+    self.fit_error = 1e8
     # Verbose flag (to control output log).
     self.verbose = True
 
-  def get_assigments(self):
+  def get_name(self):
+    """
+    Returns classifier's name.
+    """
+    return "KCM_F_GH (c = %d)" % (self.c)
+
+  def get_fit_error(self):
+    """
+    Returns fit error to model.
+    """
+    return self.fit_error
+
+  def get_assignments(self):
     """
     Returns an N-array containing the indices of the assigned means for the
     dataset used in the clustering. If the clustering hasn't been performed, 
@@ -58,8 +72,6 @@ class KCM_F_GH_Clustering:
     N = len(x_train)
     self.x_train = x_train
     self.w_train = w_train
-
-    self.log("+ KCM_F_GH (c = %d, #training_points = %d)\n" % (self.c, N))
     self.log("Start. Iteration:")
 
     # Estimate initial value of (1/s^2).
@@ -68,7 +80,7 @@ class KCM_F_GH_Clustering:
     # Initialize c clusters, each with a randomly picked point (representative).
     self.clusters = list(map(lambda i: [i], random.sample(range(N), self.c)))
     # Assign clusters for each point in x_train (with current self.clusters).
-    self.assignments = self.assign(x_train)
+    self.assignments, _ = self.assign(x_train)
     # Update clusters to add the remaining points.
     self.clusters = KCM_F_GH_Clustering.build_clusters(self.assignments, self.c)
 
@@ -78,7 +90,7 @@ class KCM_F_GH_Clustering:
       # Update hyper-paramater s (equation (24)).
       self.inv_s2 = self.update_s_parameter()
       # Reassign points.
-      assignments = self.assign(x_train)
+      assignments, self.fit_error = self.assign(x_train)
       # Stop condition: assignments haven't changed.
       if np.all(assignments == self.assignments):
         break
@@ -94,7 +106,8 @@ class KCM_F_GH_Clustering:
     Assigns each point xk in *x_set* to a cluster i. Returns an N-array of ints,
     meaning the cluster index for each one of the N input points.
     """
-    return self.assign(x_set)
+    assignments, _ = self.assign(x_set)
+    return assignments
 
   def assign(self, x_set):
     """
@@ -102,6 +115,8 @@ class KCM_F_GH_Clustering:
     It computes the euclidian distance between xk and the representatives of all
     clusters in feature space. That is, || phi(xk) - gi ||^2. Then, it chooses
     the nearest cluster i.
+    It also returns the value of the objective function (the sum of distances 
+    from all points x_set to all c clusters).
     """
     N = x_set.shape[0]
     x_train = self.x_train
@@ -133,7 +148,7 @@ class KCM_F_GH_Clustering:
 
     # Assign cluster with minimal distance to each point j. For each column 
     # (point j), we pick the row with the smallest distance.
-    return np.argmin(distances, axis=0)
+    return (np.argmin(distances, axis=0), np.sum(distances))
 
   def kernel(self, xl, xk):
     """

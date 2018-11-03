@@ -167,7 +167,7 @@ def perform_friedman_test(classifiers, x_data, w_data):
   """
   Performs Friendman's Test on input *classifiers*.
   Reference: https://en.wikipedia.org/wiki/Friedman_test).
-  Based on Marcel Santos's implementation.
+  Based on Marcel Santos' implementation.
   """
   N = num_times_cv
   k = len(classifiers)
