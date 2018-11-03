@@ -16,11 +16,11 @@ from classifiers.k_means_clustering import KMeansClustering
 # Script arguments - to define different views.
 parser = argparse.ArgumentParser(description="")
 parser.add_argument('views', metavar='N', type=str, nargs='+',
-                    help='list of views: [FULL, RGB, SHAPE].')
+                    help='view options: [FULL, RGB, SHAPE].')
 args = parser.parse_args()
 print(args)
 
-num_times = 2
+num_times = 50
 
 def main():
   print("+--------------------------------------+")
@@ -37,7 +37,7 @@ def main():
   # Load training and test data.
   loader = DataLoader()
   loader.load("data/segmentation")
-  x_data, w_data  = loader.training_data()
+  x_data, w_data  = loader.test_data()
 
   K = len(np.unique(w_data))
   shape_view = [0, 1, 3, 5, 6, 7, 8]
