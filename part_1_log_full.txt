@@ -1,0 +1,68 @@
++--------------------------------------+
+|   Machine Learning Project, Part 1   |
++--------------------------------------+
+|       Author: Rodrigo Castiel        |
++--------------------------------------+
+
++--------------------+
+|      FULL VIEW     |
++--------------------+
+KCM_F_GH (c = 7, #points = 2100)
+Run 0. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16. Finish.
+Run 1. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11. Finish.
+Run 2. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27. Finish.
+Run 3. Start. Iteration: 0 1 2 3 4 5 6 7 8 9. Finish.
+Run 4. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10. Finish.
+Run 5. Start. Iteration: 0 1 2 3 4 5 6 7 8. Finish.
+Run 6. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23. Finish.
+Run 7. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10. Finish.
+Run 8. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29. Finish.
+Run 9. Start. Iteration: 0 1 2 3 4 5 6 7 8 9. Finish.
+Run 10. Start. Iteration: 0 1 2 3 4 5 6. Finish.
+Run 11. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11. Finish.
+Run 12. Start. Iteration: 0 1 2 3 4 5 6 7. Finish.
+Run 13. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16. Finish.
+Run 14. Start. Iteration: 0 1 2 3 4 5 6 7 8. Finish.
+Run 15. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25. Finish.
+Run 16. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24. Finish.
+Run 17. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21. Finish.
+Run 18. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10. Finish.
+Run 19. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17. Finish.
+Run 20. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15. Finish.
+Run 21. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11. Finish.
+Run 22. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23. Finish.
+Run 23. Start. Iteration: 0 1 2 3 4 5 6. Finish.
+Run 24. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10. Finish.
+Run 25. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11. Finish.
+Run 26. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25. Finish.
+Run 27. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29. Finish.
+Run 28. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12. Finish.
+Run 29. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15. Finish.
+Run 30. Start. Iteration: 0 1 2 3 4 5 6 7 8. Finish.
+Run 31. Start. Iteration: 0 1 2 3 4 5 6 7 8. Finish.
+Run 32. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19. Finish.
+Run 33. Start. Iteration: 0 1 2 3 4 5 6 7 8. Finish.
+Run 34. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14. Finish.
+Run 35. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12. Finish.
+Run 36. Start. Iteration: 0 1 2 3 4 5 6 7 8. Finish.
+Run 37. Start. Iteration: 0 1 2 3 4 5 6 7. Finish.
+Run 38. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10. Finish.
+Run 39. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12. Finish.
+Run 40. Start. Iteration: 0 1 2 3 4 5 6 7 8. Finish.
+Run 41. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11. Finish.
+Run 42. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13. Finish.
+Run 43. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26. Finish.
+Run 44. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27. Finish.
+Run 45. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12. Finish.
+Run 46. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18. Finish.
+Run 47. Start. Iteration: 0 1 2 3 4 5 6 7 8. Finish.
+Run 48. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12. Finish.
+Run 49. Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14. Finish.
+
+> Adjusted rand score:  0.4906009283628602
+> Best fit error:  14787.738476291504
+
++ K-means (k = 7, #points = 2100)
+Start. Iteration: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49. Finish.
+> Adjusted rand score:  0.2828537895013041
+
