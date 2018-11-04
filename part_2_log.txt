@@ -1,0 +1,29 @@
++--------------------------------------+
+|   Machine Learning Project, Part 2   |
++--------------------------------------+
+|       Author: Rodrigo Castiel        |
++--------------------------------------+
+
+------------------- 30x 10-fold Cross-Validation ---------------------
+Classifier                                  Accuracy
++ Gaussian MLE ............................ 73.825397% (+/-15.188378%)
++ KNN Classifier (K = 1) .................. 83.730159% (+/-14.284832%)
++ Combined-Max Classifier (K = 7) ......... 82.682540% (+/-14.205028%)
+----------------------------------------------------------------------
+
+
+------------------ Accuracy Evaluation on Test Set -------------------
+Classifier                                      Accuracy
++ Gaussian MLE ................................ 74.619048% (1567/2100)
++ KNN Classifier (K = 1) ...................... 87.666667% (1841/2100)
++ Combined-Max Classifier (K = 7) ............. 81.285714% (1707/2100)
+----------------------------------------------------------------------
+
+
+---------------------------- Friedman Test  ------------------------------
+Reject H0. The classifiers are not equivalent.
+> Gaussian MLE is different from KNN Classifier (K = 1).
+> Gaussian MLE is different from Combined-Max Classifier (K = 7).
+> KNN Classifier (K = 1) is equivalent to Combined-Max Classifier (K = 7).
+--------------------------------------------------------------------------
+
