@@ -34,8 +34,8 @@ rcrs2@cin.ufpe.br}
 \maketitle
 
 \begin{abstract}
-In the first part of this report, we compare $k$-means to KCM-F-GH, its hard clustering variation in feature space proposed by Cunha et al \cite{??}.
-Both methods are evaluated on the segmentation dataset available in \cite{??} by 
+In the first part of this report, we compare $k$-means to KCM-F-GH, its hard clustering variation in feature space proposed by Carvalho et al \cite{b1}.
+Both methods are evaluated on the segmentation dataset available in \cite{b2} by 
 computing the adjusted rand index to analyze the similarity between the predicted cluster solutions and the ground-truth labels.
 In the second part, we perform a comparative analysis between three classifiers: a maximum likelihood gaussian estimator, a $k$-nearest neighbors classifier and a hybrid-model committee classifier.
 Those classifiers are also tested on the segmentation dataset.
@@ -81,7 +81,7 @@ The implementation of $k$-means and KCM-F-GH are located in \textit{k\_means\_cl
 They are both thoroughly documented.
 
 \textbf{Note}. During the initial tests of KCM-F-GH, we noticed that the update of the hyper-width parameters is not robust to constant-valued features.
-That is, if at a given moment a specific feature becomes constant within each cluster, the denominator of equation (24) becomes $0$ \cite{??}, which breaks the execution.
+That is, if at a given moment a specific feature becomes constant within each cluster, the denominator of equation (24) becomes $0$ \cite{b1}, which breaks the execution.
 It means that before actually running this algorithm in feature space, we must remove redudant dimensions in the dataset.
 For this reason, we removed the features "REGION-PIXEL-COUNT" and "SHORT-LINE-DENSITY-2" from the shape view.
 
@@ -89,12 +89,33 @@ For this reason, we removed the features "REGION-PIXEL-COUNT" and "SHORT-LINE-DE
 
 In the first experiments, we noticed that KCM-F-GH takes an average of approximately one hour to converge on the test dataset containing $2100$ points.
 Since our personal computer's hardware is not powerful, executing KCM-F-GH $100$ times per view is impossible in practice.
-Instead, we run it only $10$ times per view.
+Instead, we run it only $50$ times on the combined views, $10$ times on the separate views.
+
+Figure \ref{part_i_full} shows the output log of Part I on the full view (RGB + shape views).
+In this case, KCM-F-GH achieves $adjusted\_rand\_index = 0.4906$, outperforming $k$-means with $adjusted\_rand\_index = 0.2826$.
+However, each run of $k$-means converges in less than a minute, whereas KCM-F-GH takes nearly one hour to converge.
+
+In Figure \ref{part_i_rgb}, we can see that $k$-means performs better on the pure RGB view with $adjusted\_rand\_index = 0.3990$, while KCM-F-GH's accuracy drops to $0.4692$.
+Notice that KCM-F-GH converges in less than $15$ iterations on the RGB in all runs.
+On the full view, it may take up to $30$ iterations, but in the average it converges in $15$ iterations.
+
+The shape view experiments show that KCM-F-GH struggles to converge in most runs.
+That is, it takes over $30$ iterations and does not minize the fitting error properly (the distance in feature-space).
+In many cases, it gets to a point where the clusters gather points sharing feature with the same value, which causes the undefined behavior mentioned in the note above.
+We ran KCM-F-GH on the smaller training dataset, but we noticed that it does not converge on the shape view either.
+We limited it to $30$ iterations and we computed its adjusted rand index - it was close to $0$, almost like a random classification.
+Therefore, we do not display its log here (though you can run it on your computer).
 
 \begin{figure}
 \label{part_i_full}
 \includegraphics[width=0.50\textwidth]{part_i_full.png}
-\caption{Output log of Part I on full view (RGB + shape). We run KCM-F-GH $num\_times = 50$ with random initial representatives in each cluster. Then, we pick the best fitting KCM-F-GH and compute its adjusted rand index (see bottom). KCM-F-GH achieved $0.4906$ while $k$-means achieved $0.2826$.}
+\caption{Output log of Part I on full view (RGB + shape). We run KCM-F-GH $num\_times = 50$ with random initial representatives in each cluster. Then, we pick the best fitting KCM-F-GH and compute its adjusted rand index (see bottom). KCM-F-GH achieved $ari_\textit{KCM-F-GH} = 0.4906$ while $k$-means achieved $ari_\textit{k-means} = 0.2826$.}
+\end{figure}
+
+\begin{figure}
+\label{part_i_rgb}
+\includegraphics[width=0.50\textwidth]{part_i_rgb.png}
+\caption{Output log of Part I on full view (RGB). We run KCM-F-GH $num\_times = 10$ with random initial representatives in each cluster. Then, we pick the best fitting KCM-F-GH and compute its adjusted rand index (see bottom). KCM-F-GH achieved $ari_\textit{KCM-F-GH} = 0.4692$ while $k$-means achieved $ari_\textit{k-means} = 0.3990$.}
 \end{figure}
 
 \section{Part II - Supervised Learning}
@@ -131,13 +152,13 @@ It forwards \textit{fit} and \textit{predict} to all its classifier-view pairs, 
 
 \begin{figure}
 \label{part_ii_results}
-\includegraphics[width=0.45\textwidth]{part_ii_results.png}
+\includegraphics[width=0.50\textwidth]{part_ii_results.png}
 \caption{Output log of Part II. The first section shows the average accuracy and its error margin measured by running 10-fold cross-validation 30 times on the training dataset. The second section shows the overall accuracy measured on the test dataset. The last section shows the Friedman test result (on the training dataset).}
 \end{figure}
 
+Grid-search finds that the optimal hyper-parameters are $k = 1$ for KNN and $k = 7$ for the hybrid method.
 Figure \ref{part_ii_results} was taken from the output log of Part II.
-Grid-search finds that the best hyper-parameters are $k = 1$ for KNN and $k = 7$ for the hybrid method.
-As we can see in the cross-validation table, Gaussian MLE has the lowest accuracy among all classifiers ($\approx74\%$), while both hybrid and KNN achieve similar accuracies ($\approx 83\%$).
+As we can see in the cross-validation table, Gaussian MLE has the lowest average accuracy among all classifiers ($\approx74\%$), while both hybrid and KNN achieve similarly higher accuracies ($\approx 83\%$).
 On the complete test set containing $2100$ points, KNN achieves the highest accuracy, followed by hybrid and then Gaussian MLE.
 In fact according to the Friedman test results, KNN and hyrid are statistically equivalent.
 
@@ -146,37 +167,30 @@ Gaussian MLE is indeed the cheapest method, because its prediction consists only
 
 \section{Conclusion}
 
-blah blah blah blah blah blah.
+\textbf{Part I}. KCM-F-GH outperforms the standard $k$-means, but it is dozens of times slower than it.
+It may be achieve better results in different datasets.
+However, on the segmentation dataset it has more drawbacks than advantages.
+Perhaps, the instrinsic nature of this data does not fit well with gaussian kernels (and therefore, its related algorithms).
 
-\section*{References}
-
-Please number citations consecutively within brackets \cite{b1}. The 
-sentence punctuation follows the bracket \cite{b2}. Refer simply to the reference 
-number, as in \cite{b3}---do not use ``Ref. \cite{b3}'' or ``reference \cite{b3}'' except at 
-the beginning of a sentence: ``Reference \cite{b3} was the first $\ldots$''
-
-Number footnotes separately in superscripts. Place the actual footnote at 
-the bottom of the column in which it was cited. Do not put footnotes in the 
-abstract or reference list. Use letters for table footnotes.
-
-Unless there are six authors or more give all authors' names; do not use 
-``et al.''. Papers that have not been published, even if they have been 
-submitted for publication, should be cited as ``unpublished'' \cite{b4}. Papers 
-that have been accepted for publication should be cited as ``in press'' \cite{b5}. 
-Capitalize only the first word in a paper title, except for proper nouns and 
-element symbols.
-
-For papers published in translation journals, please give the English 
-citation first, followed by the original foreign-language citation \cite{b6}.
+\textbf{Part II}. KNN achieved the best tradeoff between accuracy and computational cost.
+Though Gaussian MLE is linear in complexity, it tends to be less accurate than KNN (on this particular dataset).
+Furthermore, additional optimizations in KNN, like the usage of spatial datastructures to store points, may improve considerably its performance on large datasets.
+Another advantage is its hyper-parameter $k$, which makes it more robust to noise in data.
 
 \begin{thebibliography}{00}
-\bibitem{b1} G. Eason, B. Noble, and I. N. Sneddon, ``On certain integrals of Lipschitz-Hankel type involving products of Bessel functions,'' Phil. Trans. Roy. Soc. London, vol. A247, pp. 529--551, April 1955.
-\bibitem{b2} J. Clerk Maxwell, A Treatise on Electricity and Magnetism, 3rd ed., vol. 2. Oxford: Clarendon, 1892, pp.68--73.
-\bibitem{b3} I. S. Jacobs and C. P. Bean, ``Fine particles, thin films and exchange anisotropy,'' in Magnetism, vol. III, G. T. Rado and H. Suhl, Eds. New York: Academic, 1963, pp. 271--350.
-\bibitem{b4} K. Elissa, ``Title of paper if known,'' unpublished.
-\bibitem{b5} R. Nicole, ``Title of paper with only first word capitalized,'' J. Name Stand. Abbrev., in press.
-\bibitem{b6} Y. Yorozu, M. Hirano, K. Oka, and Y. Tagawa, ``Electron spectroscopy studies on magneto-optical media and plastic substrate interface,'' IEEE Transl. J. Magn. Japan, vol. 2, pp. 740--741, August 1987 [Digests 9th Annual Conf. Magnetics Japan, p. 301, 1982].
-\bibitem{b7} M. Young, The Technical Writer's Handbook. Mill Valley, CA: University Science, 1989.
+\bibitem{b1} Francisco de A.T. de Carvalho, Eduardo C. Simões, Lucas V.C. Santana, Marcelo R.P. Ferreira,
+Gaussian kernel c-means hard clustering algorithms with automated computation of the width hyper-parameters,
+Pattern Recognition,
+Volume 79,
+2018,
+Pages 370-386,
+ISSN 0031-3203,
+https://doi.org/10.1016/j.patcog.2018.02.018.
+
+\bibitem{b2} Vision Group, University of Massachusetts, 
+Image Segmentation Data,
+http://archive.ics.uci.edu/ml/machine-learning-databases/image/.
+
 \end{thebibliography}
 
 \end{document}
